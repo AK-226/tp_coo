@@ -1,44 +1,48 @@
 from django.test import TestCase
 
 # Create your tests here.
-from .models import machine
-from .models import departement
-from .models import ingredient
-from .models import quantiteIngredient
-from .models import prix
+from .models import Machine
+from .models import Departement
+from .models import Ingredient
+from .models import QuantiteIngredient
+from .models import Prix
+from .models import Usine
 
-Class MachineModelTests(TestCase):
-def test_usine_creation(self):
-    self.assertEqual(Machine.objects.count(), 0)
-    Machine.objects.create(nom="fermenteur", prix=1_000)
-    self.asssertEqual(Machine.objects.count(), 1)
+class MachineModelTests(TestCase):
+    def test_usine_creation(self):
+        self.assertEqual(Machine.objects.count(), 0)
+        Machine.objects.create(nom="fermenteur", prix=1_000)
+        self.assertEqual(Machine.objects.count(), 1)
 
-Class CostsModelTests(TestCase):
-def test_costs(self):
+class CostsModelTests(TestCase):
+    def test_costs(self):
 
-    Machine.objects.create(nom="fermenteur", prix=1_000)
-    Machine.objects.create(nom="brasseur", prix=2_000)
+        fermenteur = Machine.objects.create(nom="fermenteur", prix=1_000)
+        brasseur = Machine.objects.create(nom="brasseur", prix=2_000)
 
-    departements= Departement.objects.create(numero=31, prix=2_000)
+        departements= Departement.objects.create(numero=31, prix=2_000)
 
 
-    houblon = Ingredient.objects.create(nom="houblon")
+        houblon = Ingredient.objects.create(nom="houblon")
 
-    orge = Ingredient.objects.create(nom="orge")
+        orge = Ingredient.objects.create(nom="orge")
 
-    QuantiteIngredient.objects.create(ingredient=houblon,quantite=50)
+        quantiteHoublon = QuantiteIngredient.objects.create(ingredient=houblon,quantite=50)
 
-    QuantiteIngredient.objects.create(ingredient=orge,quantite=100)
+        quantiteOrge = QuantiteIngredient.objects.create(ingredient=orge,quantite=100)
 
-    Prix.objects.create(ingredient=houblon,departement=departements,prix=20)
+        Prix.objects.create(ingredient=houblon,departement=departements,prix=20)
 
-    Prix.objects.create(ingredient=orge,departement=departements,prix=10)
+        Prix.objects.create(ingredient=orge,departement=departements,prix=10)
 
-    usine = Usine.objects.create(departement=departements, taille='50', machines=2, recettes='...', stocks=50)
+        usine = Usine.objects.create(departement=departements, taille='50')
+        usine.machines.add(fermenteur)
+        usine.machines.add(brasseur)
+        usine.stocks.add(quantiteHoublon)
+        usine.stocks.add(quantiteOrge)
 
-    result = usine.costs()
-    print(result)
-
+        result = usine.costs()
+        self.assertEqual(result, 105000)
 #------------------------------
 
 # Créez un département

@@ -14,7 +14,7 @@ class Machine(models.Model):
 
     def __str__(self):
         return self.nom
-    def __costs__(self):
+    def costs(self):
         return self.prix
 class Ingredient(models.Model):
     nom = models.CharField(max_length=200)
@@ -29,8 +29,8 @@ class QuantiteIngredient(models.Model):
     def __str__(self):
         return f"{self.quantite} {self.ingredient.nom}"
 
-    def __costs__(self,departement):#Cette methode calcul le cout de la quantite d'ingredient en fonction du departement
-        return self.ingredient.prix_set.get(departement_numero=departement).prix*self.quantite  # cout = prix de l'ingredient dans le departement donné * par la quantite d'ingredient
+    def costs(self,departement):#Cette methode calcul le cout de la quantite d'ingredient en fonction du departement
+        return self.ingredient.prix_set.get(departement__numero=departement).prix*self.quantite  # cout = prix de l'ingredient dans le departement donné * par la quantite d'ingredient
 
 class Action(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
@@ -58,15 +58,16 @@ class Usine(models.Model):
 
     def __str__(self):
         return f"Usine dans le département{self.departement.numero}"
-    def __costs__(self):#Cette methode calcul le cout d'une usine
+    def costs(self):#Cette methode calcul le cout d'une usine
         total =0
-        for machine in self.machine.all():
+        for machine in self.machines.all():
             total+=machine.costs()
-
-        return self.taille*self.departement.prix+total  #
+        for stock in self.stocks.all():
+            total+=stock.costs(self.departement.numero)
+        return int(self.taille)*self.departement.prix+total  #
 
 class Prix(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,related_name="+")
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     departement = models.ForeignKey(Departement, on_delete=models.CASCADE,related_name="+")
     prix = models.IntegerField()
 
