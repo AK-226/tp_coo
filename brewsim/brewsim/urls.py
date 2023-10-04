@@ -16,7 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from high_level.views import DepartementDetailView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+
+    path("departement/<int:pk>",DepartementDetailView.as_view(),name='departement-detail'),
 ]
